@@ -2,7 +2,7 @@
   <div class="translate-header">
     <div class="left-selector">
       <nav mat-tab-nav-bar>
-        <a mat-tab-link *ngFor="let l of listLeft" [active]="sourceType == l" (click)="sourceType=l">{{l}}</a>
+        <a mat-tab-link *ngFor="let l of listLeft" [active]="sourceType == l" (click)="setSourceType(l)">{{l}}</a>
       </nav>
     </div>
     <div class="swap-icon">
@@ -10,16 +10,12 @@
     </div>
     <div class="right-selector">
       <nav mat-tab-nav-bar>
-        <a mat-tab-link *ngFor="let l of listRight" [active]="destType == l" (click)="destType=l">{{l}}</a>
+        <a mat-tab-link *ngFor="let l of listRight" [active]="destType == l" (click)="setDestType(l)">{{l}}</a>
       </nav>
     </div>
   </div>
   <div class="translate-body">
-    <div class="left-pane">
-      <app-camera></app-camera>
-    </div>
-    <div class="right-pane">
-
-    </div>
+    <div #leftPane class="left-pane"></div>
+    <div #rightPane class="right-pane"></div>
   </div>
 </div>

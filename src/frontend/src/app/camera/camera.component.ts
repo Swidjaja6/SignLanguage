@@ -10,7 +10,7 @@ export class CameraComponent implements OnInit {
   @ViewChild('webcam') webcam!: ElementRef; 
   webcamWidth: number = 50000;
 
-  constructor(private elRef: ElementRef) { }
+  constructor() { }
 
   ngOnInit(): void {
   }
@@ -18,5 +18,4 @@ export class CameraComponent implements OnInit {
   ngAfterViewInit(){
     this.webcamWidth = this.webcam.nativeElement.offsetWidth;
   }
-
 }

@@ -2,54 +2,24 @@
   <div class="translate-header">
     <div class="left-selector">
       <nav mat-tab-nav-bar>
-        <a mat-tab-link active="true">ASL</a>
+        <a mat-tab-link *ngFor="let l of listLeft" [active]="sourceType == l" (click)="sourceType=l">{{l}}</a>
       </nav>
     </div>
     <div class="swap-icon">
-      <mat-icon aria-hidden="false" fontIcon="swap_horiz"></mat-icon>
+      <mat-icon aria-hidden="false" fontIcon="swap_horiz" (click)="swap()"></mat-icon>
     </div>
     <div class="right-selector">
       <nav mat-tab-nav-bar>
-        <a mat-tab-link active="true">English</a>
+        <a mat-tab-link *ngFor="let l of listRight" [active]="destType == l" (click)="destType=l">{{l}}</a>
       </nav>
     </div>
   </div>
   <div class="translate-body">
     <div class="left-pane">
       <app-camera></app-camera>
-
     </div>
     <div class="right-pane">
 
     </div>
-
   </div>
 </div>
-
-<!-- <div class="home-container">
-  <div class="top-bar">
-
-  </div>
-  <div class="bottom-container">
-    <div class="left-pane">
-      <app-camera class="center"></app-camera>
-    </div>
-    <div class="middle-pane">
-      <div class="swap-icon">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-      </div>
-  
-    </div>
-    <div class="right-pane">
-  
-    </div>
-
-  </div>
-  
-  <mat-form-field class="example-full-width" appearance="fill">
-    <mat-label>Leave a comment</mat-label>
-    <textarea matInput placeholder="Ex. It makes me feel..."></textarea>
-
-  </mat-form-field>
-
-</div> -->

@@ -15,7 +15,19 @@
     </div>
   </div>
   <div class="translate-body">
-    <div #leftPane class="left-pane"></div>
-    <div #rightPane class="right-pane"></div>
+    <div class="left-pane">
+      <ng-container #leftPane></ng-container>
+    </div>
+    <div class="right-pane">
+      <ng-container #rightPane></ng-container>
+    </div>
   </div>
 </div>
+
+<ng-template #textAreaRO>
+  <textarea matInput readonly></textarea>
+</ng-template>
+
+<ng-template #textArea>
+  <textarea matInput></textarea>
+</ng-template>

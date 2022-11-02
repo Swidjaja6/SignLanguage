@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ApplicationRef, createComponent, ViewContainerRef, EnvironmentInjector, ComponentRef } from '@angular/core';
+import { Component, OnInit, ViewChild, createComponent, ViewContainerRef, EnvironmentInjector, ComponentRef, TemplateRef } from '@angular/core';
 import { CameraComponent } from '../camera/camera.component';
 
 @Component({
@@ -14,47 +14,57 @@ export class HomeComponent implements OnInit {
   destType: string = 'English';
   @ViewChild('leftPane', { read: ViewContainerRef }) leftPane!: ViewContainerRef;
   @ViewChild('rightPane', { read: ViewContainerRef }) rightPane!: ViewContainerRef;
+  @ViewChild('textArea', { read: TemplateRef}) textArea!: TemplateRef<any>;
+  @ViewChild('textAreaRO', { read: TemplateRef}) textAreaRO!: TemplateRef<any>;
   cameraRef!: ComponentRef<CameraComponent>;
 
-  constructor(private appRef: ApplicationRef, private injector: EnvironmentInjector) { }
+  constructor(private injector: EnvironmentInjector) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {  }
 
   ngAfterViewInit(){
-    this.updateView()
+    this.updateView()    
   }
 
   updateView(){
+    this.rightPane.clear();
+    this.leftPane.clear();
+    if(this.cameraRef){
+      this.cameraRef.destroy();
+    }
     switch(this.sourceType){
       case 'ASL':
         this.cameraRef = createComponent(CameraComponent, {
           environmentInjector: this.injector
         });
-        this.leftPane.element.nativeElement.appendChild(this.cameraRef.location.nativeElement);
-        this.appRef.attachView(this.cameraRef.hostView);
+        this.leftPane.insert(this.cameraRef.hostView)
         break;
       default:
-        this.cameraRef.destroy();
-        //TODO
+        let tempRef = this.textArea.createEmbeddedView({name: "text view"});
+        this.leftPane.insert(tempRef);
     }
-
     switch(this.destType){
       case 'ASL':
-        this.rightPane.element.nativeElement.innerHTML = "";
-        //TODO        
+        //TODO
+        this.cameraRef = createComponent(CameraComponent, {
+          environmentInjector: this.injector
+        });
+        this.rightPane.insert(this.cameraRef.hostView)
         break;
       default:
-        this.rightPane.element.nativeElement.innerHTML = "";
-        //TODO
+        let tempRef = this.textAreaRO.createEmbeddedView({name: "text view"});        
+        this.rightPane.insert(tempRef);
     }
   }
 
   setSourceType(src:string){
+    if(this.sourceType === src) return;
     this.sourceType = src;
     this.updateView();
   }
 
   setDestType(dest: string){
+    if(this.destType === dest) return;
     this.destType = dest;
     this.updateView();
   }

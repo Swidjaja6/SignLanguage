@@ -1,4 +1,9 @@
 <div class="home-container">
+  <div class="home-controls">
+    <label for="mediaPipeSwitch">Show Mediapipe Output</label>
+    <mat-slide-toggle [checked]="showMediapipe" (change)="switchMediapipe($event)" id="mediaPipeSwitch"></mat-slide-toggle>
+  </div>
+  
   <div class="translate-header">
     <div class="left-selector">
       <nav mat-tab-nav-bar>

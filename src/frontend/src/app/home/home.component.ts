@@ -8,6 +8,7 @@ import { CameraComponent } from '../camera/camera.component';
 })
 export class HomeComponent implements OnInit {
 
+  showMediapipe = false;
   listLeft = ['ASL',];
   listRight = ['English',];
   sourceType: string = "ASL";
@@ -26,6 +27,12 @@ export class HomeComponent implements OnInit {
     this.updateView()    
   }
 
+  switchMediapipe(e:any){
+    this.showMediapipe = e.checked
+    // this.cameraRef.instance.showMediapipe = this.showMediapipe;
+    this.cameraRef.setInput('showMediapipe', this.showMediapipe)
+  }
+
   updateView(){
     this.rightPane.clear();
     this.leftPane.clear();
@@ -37,6 +44,7 @@ export class HomeComponent implements OnInit {
         this.cameraRef = createComponent(CameraComponent, {
           environmentInjector: this.injector
         });
+        this.cameraRef.instance.showMediapipe = this.showMediapipe;
         this.leftPane.insert(this.cameraRef.hostView)
         break;
       default:
@@ -49,6 +57,7 @@ export class HomeComponent implements OnInit {
         this.cameraRef = createComponent(CameraComponent, {
           environmentInjector: this.injector
         });
+        this.cameraRef.instance.showMediapipe = this.showMediapipe;
         this.rightPane.insert(this.cameraRef.hostView)
         break;
       default:

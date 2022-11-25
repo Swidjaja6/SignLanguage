@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, SimpleChanges, ViewChild } from '@angular/core';
 import * as mpHolistic from '@mediapipe/holistic'
 import * as mpControls from '@mediapipe/control_utils'
 import * as drawingUtils from '@mediapipe/drawing_utils'
@@ -12,6 +12,8 @@ import {Camera} from '@mediapipe/camera_utils'
 })
 export class CameraComponent implements AfterViewInit {
 
+  @Input('showMediapipe') showMediapipe: boolean = false;
+
   @ViewChild('webcam') webcamRef:any; 
   @ViewChild('canvas') canvasRef:any;
   @ViewChild('control') controlP:any;
@@ -20,10 +22,23 @@ export class CameraComponent implements AfterViewInit {
   fpsControl = new mpControls.FPS();
   canvasCtx :any;
   sequence:any = [];
+  predictions:any = [];
   model:any;
 
   constructor() {
     
+  }
+
+  ngOnChanges(changes:SimpleChanges){
+    console.log(changes, changes[0], changes['showMediapipe'].currentValue)
+    if(changes['showMediapipe'] && changes['showMediapipe'].currentValue == true){
+      this.webcam.hidden = true;
+      this.canvasRef.nativeElement.hidden = false
+    }
+    else if(changes['showMediapipe'] && changes['showMediapipe'].currentValue == false){
+      this.webcam.hidden = false;
+      this.canvasRef.nativeElement.hidden = true
+    }
   }
 
   async ngAfterViewInit(){
@@ -64,7 +79,6 @@ export class CameraComponent implements AfterViewInit {
       this.fpsControl
     ]).on(x => {
       const options = x as mpHolistic.Options;
-      // this.webcam.classList.toggle('selfie', options.selfieMode);
       this.activeEffect = (x as {[key: string]: string})['effect'];
       holistic.setOptions(options);
     });;
@@ -136,6 +150,9 @@ export class CameraComponent implements AfterViewInit {
   }
 
   onResultNew(results: mpHolistic.Results): void{
+    if(this.showMediapipe){
+      this.drawLandmarks(results);
+    }
     let landmarks = this.processLandmarksForPrediction(results);
     let actions = ['hello', 'thanks', 'iloveyou'].reverse()
     this.sequence.push(landmarks);
@@ -143,19 +160,16 @@ export class CameraComponent implements AfterViewInit {
     if(this.sequence && this.sequence.length ==30){
       let tr = this.model.predict(tf.tensor([this.sequence]));
       let preds = tr.dataSync();
-      console.log(actions[this.argMax(Array.from(preds))])
-      
+      console.log(actions[this.argMax(Array.from(preds))]) 
     }
-    
-
   }
 
-  onResults(results: mpHolistic.Results): void {
+  drawLandmarks(results: mpHolistic.Results): void {
     // Hide the spinner.
-    document.body.classList.add('loaded');
+    // document.body.classList.add('loaded');
   
     // Remove landmarks we don't want to draw.
-    this.removeLandmarks(results);
+    // this.removeLandmarks(results);
   
     // Update the frame rate.
     this.fpsControl.tick();

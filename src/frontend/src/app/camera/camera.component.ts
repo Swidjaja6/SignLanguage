@@ -1,9 +1,18 @@
-import { AfterViewInit, Component, Input, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import * as mpHolistic from '@mediapipe/holistic'
 import * as mpControls from '@mediapipe/control_utils'
 import * as drawingUtils from '@mediapipe/drawing_utils'
 import * as tf from '@tensorflow/tfjs'
 import {Camera} from '@mediapipe/camera_utils'
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+
+@Component({
+  selector: 'loading-dialog',
+  templateUrl: 'loadingDialog.component.html',
+})
+export class ModelLoadingDialog  {
+  constructor(public dialogRef: MatDialogRef<ModelLoadingDialog>) {}
+}
 
 @Component({
   selector: 'app-camera',
@@ -13,19 +22,23 @@ import {Camera} from '@mediapipe/camera_utils'
 export class CameraComponent implements AfterViewInit {
 
   @Input('showMediapipe') showMediapipe: boolean = false;
+  @Output("predictions") predictions = []
 
   @ViewChild('webcam') webcamRef:any; 
   @ViewChild('canvas') canvasRef:any;
   @ViewChild('control') controlP:any;
   webcam!: HTMLVideoElement;
+  camera:any;
+
   activeEffect = 'mask';
   fpsControl = new mpControls.FPS();
   canvasCtx :any;
   sequence:any = [];
-  predictions:any = [];
   model:any;
+  holistic:any;
+  loading = true;
 
-  constructor() {
+  constructor(public dialog: MatDialog) {
     
   }
 
@@ -44,28 +57,37 @@ export class CameraComponent implements AfterViewInit {
   async ngAfterViewInit(){
     //load model
     this.model = await tf.loadLayersModel('../../assets/tfjs_converted_model/model.json');
-
+    this.openDialog()
     //setup cam
     this.setupWebcam()
-    const camera = new Camera(this.webcam, {
-      onFrame: async() => {      
-        if(this.webcam.videoWidth) await holistic.send({image: this.webcam});
-      },
-      width: 320,
-      height: 240,
-    })
-    camera.start()
+    this.camera.start()
 
+    //get canvas context
     this.canvasCtx = this.canvasRef.nativeElement.getContext('2d');
 
     //setup mediapipe
+    this.initMediapipe();
+    
+
+  }
+
+  openDialog(): void {
+    this.dialog.open(ModelLoadingDialog, {
+      width: '250px',
+    })
+  }
+
+  initMediapipe(){
     const config = {locateFile: (file:any) => {
       return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@` +
              `${mpHolistic.VERSION}/${file}`;
     }};
-    const holistic = new mpHolistic.Holistic(config);
-    holistic.onResults(this.onResultNew.bind(this));
+    this.holistic = new mpHolistic.Holistic(config);
+    this.holistic.onResults(this.onResults.bind(this));
+    this.initMediapipeControls();
+  }
 
+  initMediapipeControls(){
     new mpControls.ControlPanel(this.controlP.nativeElement, {
       selfieMode: true,
       modelComplexity: 1,
@@ -80,9 +102,8 @@ export class CameraComponent implements AfterViewInit {
     ]).on(x => {
       const options = x as mpHolistic.Options;
       this.activeEffect = (x as {[key: string]: string})['effect'];
-      holistic.setOptions(options);
+      this.holistic.setOptions(options);
     });;
-
   }
 
   setupWebcam(){
@@ -93,6 +114,13 @@ export class CameraComponent implements AfterViewInit {
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
       this.webcam.srcObject = stream;
     });
+    this.camera = new Camera(this.webcam, {
+      onFrame: async() => {      
+        if(this.webcam.videoWidth) await this.holistic.send({image: this.webcam});
+      },
+      width: 320,
+      height: 240,
+    })
   }
 
   processLandmarksForPrediction(results: mpHolistic.Results){
@@ -149,7 +177,8 @@ export class CameraComponent implements AfterViewInit {
     return array.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
   }
 
-  onResultNew(results: mpHolistic.Results): void{
+  onResults(results: mpHolistic.Results): void{
+    this.loading = false;this.dialog.closeAll()
     if(this.showMediapipe){
       this.drawLandmarks(results);
     }
@@ -160,7 +189,10 @@ export class CameraComponent implements AfterViewInit {
     if(this.sequence && this.sequence.length ==30){
       let tr = this.model.predict(tf.tensor([this.sequence]));
       let preds = tr.dataSync();
-      console.log(actions[this.argMax(Array.from(preds))]) 
+      let currentPred = actions[this.argMax(Array.from(preds))];
+      console.log(currentPred)
+      
+
     }
   }
 

@@ -22,7 +22,7 @@ export class ModelLoadingDialog  {
 export class CameraComponent implements AfterViewInit {
 
   @Input('showMediapipe') showMediapipe: boolean = false;
-  @Output("predictions") predictions = []
+  @Output("predictions") predictions:string[] = []
 
   @ViewChild('webcam') webcamRef:any; 
   @ViewChild('canvas') canvasRef:any;
@@ -191,6 +191,10 @@ export class CameraComponent implements AfterViewInit {
       let preds = tr.dataSync();
       let currentPred = actions[this.argMax(Array.from(preds))];
       console.log(currentPred)
+      if(this.predictions.at(-1) != currentPred){
+        this.predictions.push(currentPred);
+        console.log(this.predictions)
+      }
       
 
     }

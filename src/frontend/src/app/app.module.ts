@@ -4,8 +4,9 @@ import { WebcamModule } from 'ngx-webcam';
 
 
 import { AppComponent } from './app.component';
-import { CameraComponent } from './camera/camera.component';
+import { CameraComponent, ModelLoadingDialog } from './camera/camera.component';
 import { HomeComponent } from './home/home.component';
+import { TextComponent } from './text/text.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatInputModule} from '@angular/material/input';
 import {MatGridListModule} from '@angular/material/grid-list';
@@ -13,13 +14,17 @@ import {MatCardModule} from '@angular/material/card';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
-
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatDialogModule} from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
     AppComponent,
     CameraComponent,
-    HomeComponent
+    HomeComponent,
+    ModelLoadingDialog,
+    TextComponent
   ],
   imports: [
     BrowserModule,
@@ -30,7 +35,11 @@ import {MatIconModule} from '@angular/material/icon';
     MatCardModule,
     MatTabsModule,
     MatDividerModule,
-    MatIconModule
+    MatIconModule,
+    MatSlideToggleModule,
+    MatProgressSpinnerModule,
+    MatDialogModule
+
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -115,14 +115,16 @@ export class CameraComponent implements AfterViewInit {
     };
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
       this.webcam.srcObject = stream;
+      let {width, height} = stream.getTracks()[0].getSettings();
+      this.canvasRef.nativeElement.width = width;
+      this.canvasRef.nativeElement.height = height;
     });
     this.camera = new Camera(this.webcam, {
       onFrame: async() => {      
         if(this.webcam.videoWidth) await this.holistic.send({image: this.webcam});
-      },
-      width: 320,
-      height: 240,
+      }
     })
+    
   }
 
   processLandmarksForPrediction(results: mpHolistic.Results){

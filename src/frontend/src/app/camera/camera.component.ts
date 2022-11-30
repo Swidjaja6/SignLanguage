@@ -32,7 +32,6 @@ export class CameraComponent implements AfterViewInit {
   camera:any;
 
   activeEffect = 'mask';
-  fpsControl = new mpControls.FPS();
   canvasCtx :any;
   sequence:any = [];
   model:any;
@@ -44,7 +43,6 @@ export class CameraComponent implements AfterViewInit {
   }
 
   ngOnChanges(changes:SimpleChanges){
-    console.log(changes, changes[0], changes['showMediapipe'].currentValue)
     if(changes['showMediapipe'] && changes['showMediapipe'].currentValue == true){
       this.webcam.hidden = true;
       this.canvasRef.nativeElement.hidden = false
@@ -103,9 +101,7 @@ export class CameraComponent implements AfterViewInit {
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
       effect: 'background',
-    }).add([
-      this.fpsControl
-    ]).on(x => {
+    }).on(x => {
       const options = x as mpHolistic.Options;
       this.activeEffect = (x as {[key: string]: string})['effect'];
       this.holistic.setOptions(options);
@@ -119,14 +115,16 @@ export class CameraComponent implements AfterViewInit {
     };
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
       this.webcam.srcObject = stream;
+      let {width, height} = stream.getTracks()[0].getSettings();
+      this.canvasRef.nativeElement.width = width;
+      this.canvasRef.nativeElement.height = height;
     });
     this.camera = new Camera(this.webcam, {
       onFrame: async() => {      
         if(this.webcam.videoWidth) await this.holistic.send({image: this.webcam});
-      },
-      width: 320,
-      height: 240,
+      }
     })
+    
   }
 
   processLandmarksForPrediction(results: mpHolistic.Results){
@@ -211,8 +209,6 @@ export class CameraComponent implements AfterViewInit {
     // Remove landmarks we don't want to draw.
     // this.removeLandmarks(results);
   
-    // Update the frame rate.
-    this.fpsControl.tick();
   
     // Draw the overlays.
     this.canvasCtx.save();

@@ -6,6 +6,7 @@ import { WebcamModule } from 'ngx-webcam';
 import { AppComponent } from './app.component';
 import { CameraComponent, ModelLoadingDialog } from './camera/camera.component';
 import { HomeComponent } from './home/home.component';
+import { TextComponent } from './text/text.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatInputModule} from '@angular/material/input';
 import {MatGridListModule} from '@angular/material/grid-list';
@@ -22,7 +23,8 @@ import {MatDialogModule} from '@angular/material/dialog';
     AppComponent,
     CameraComponent,
     HomeComponent,
-    ModelLoadingDialog
+    ModelLoadingDialog,
+    TextComponent
   ],
   imports: [
     BrowserModule,

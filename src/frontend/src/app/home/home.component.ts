@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, createComponent, ViewContainerRef, EnvironmentInjector, ComponentRef, TemplateRef } from '@angular/core';
 import { CameraComponent } from '../camera/camera.component';
+import { TextComponent } from '../text/text.component';
 
 @Component({
   selector: 'app-home',
@@ -15,9 +16,9 @@ export class HomeComponent implements OnInit {
   destType: string = 'English';
   @ViewChild('leftPane', { read: ViewContainerRef }) leftPane!: ViewContainerRef;
   @ViewChild('rightPane', { read: ViewContainerRef }) rightPane!: ViewContainerRef;
-  @ViewChild('textArea', { read: TemplateRef}) textArea!: TemplateRef<any>;
-  @ViewChild('textAreaRO', { read: TemplateRef}) textAreaRO!: TemplateRef<any>;
+  textAreaRef!: ComponentRef<TextComponent>;
   cameraRef!: ComponentRef<CameraComponent>;
+  predictions: string[] = [];
 
   constructor(private injector: EnvironmentInjector) { }
 
@@ -33,11 +34,21 @@ export class HomeComponent implements OnInit {
     this.cameraRef.setInput('showMediapipe', this.showMediapipe)
   }
 
+  onNewPredictions(predictions: string[]){
+    this.predictions = predictions;
+    if(this.predictions.at(-1) != 'nothing'){
+      this.textAreaRef.instance.addWord(this.predictions.at(-1));
+    }
+  }
+
   updateView(){
     this.rightPane.clear();
     this.leftPane.clear();
     if(this.cameraRef){
       this.cameraRef.destroy();
+    }
+    if(this.textAreaRef){
+      this.textAreaRef.destroy();
     }
     switch(this.sourceType){
       case 'ASL':
@@ -45,11 +56,14 @@ export class HomeComponent implements OnInit {
           environmentInjector: this.injector
         });
         this.cameraRef.instance.showMediapipe = this.showMediapipe;
+        this.cameraRef.instance.predictionsEvent.subscribe(predictions => {this.onNewPredictions(predictions)});
         this.leftPane.insert(this.cameraRef.hostView)
         break;
       default:
-        let tempRef = this.textArea.createEmbeddedView({name: "text view"});
-        this.leftPane.insert(tempRef);
+        this.textAreaRef = createComponent(TextComponent, {
+          environmentInjector: this.injector
+        })
+        this.leftPane.insert(this.textAreaRef.hostView);
     }
     switch(this.destType){
       case 'ASL':
@@ -57,12 +71,15 @@ export class HomeComponent implements OnInit {
         this.cameraRef = createComponent(CameraComponent, {
           environmentInjector: this.injector
         });
+        this.cameraRef.instance.predictionsEvent.subscribe(val => console.log(val));
         this.cameraRef.instance.showMediapipe = this.showMediapipe;
         this.rightPane.insert(this.cameraRef.hostView)
         break;
       default:
-        let tempRef = this.textAreaRO.createEmbeddedView({name: "text view"});        
-        this.rightPane.insert(tempRef);
+        this.textAreaRef = createComponent(TextComponent, {
+          environmentInjector: this.injector
+        })
+        this.rightPane.insert(this.textAreaRef.hostView);
     }
   }
 

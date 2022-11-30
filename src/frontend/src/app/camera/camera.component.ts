@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import * as mpHolistic from '@mediapipe/holistic'
 import * as mpControls from '@mediapipe/control_utils'
 import * as drawingUtils from '@mediapipe/drawing_utils'
@@ -22,7 +22,8 @@ export class ModelLoadingDialog  {
 export class CameraComponent implements AfterViewInit {
 
   @Input('showMediapipe') showMediapipe: boolean = false;
-  @Output("predictions") predictions:string[] = []
+  @Output("predictions") predictionsEvent = new EventEmitter<string[]>();
+  predictions:string[] = [];
 
   @ViewChild('webcam') webcamRef:any; 
   @ViewChild('canvas') canvasRef:any;
@@ -69,6 +70,11 @@ export class CameraComponent implements AfterViewInit {
     this.initMediapipe();
     
 
+  }
+
+  addPrediction(word: string){
+    this.predictions.push(word);
+    this.predictionsEvent.emit(this.predictions);
   }
 
   openDialog(): void {
@@ -183,17 +189,15 @@ export class CameraComponent implements AfterViewInit {
       this.drawLandmarks(results);
     }
     let landmarks = this.processLandmarksForPrediction(results);
-    let actions = ['hello', 'thanks', 'iloveyou'].reverse()
+    let actions = ['hello', 'thanks', 'iloveyou', 'nothing', 'a', 'two']
     this.sequence.push(landmarks);
     this.sequence = this.sequence.slice(-30);
     if(this.sequence && this.sequence.length ==30){
       let tr = this.model.predict(tf.tensor([this.sequence]));
       let preds = tr.dataSync();
       let currentPred = actions[this.argMax(Array.from(preds))];
-      console.log(currentPred)
       if(this.predictions.at(-1) != currentPred){
-        this.predictions.push(currentPred);
-        console.log(this.predictions)
+        this.addPrediction(currentPred);
       }
       
 

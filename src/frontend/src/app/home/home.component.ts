@@ -41,6 +41,15 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  onClear(){
+    if(this.cameraRef && this.cameraRef.instance){
+      this.cameraRef.instance.predictions = [];
+    }
+    if(this.textAreaRef && this.textAreaRef.instance){
+      this.textAreaRef.instance.clear();
+    }
+  }
+
   updateView(){
     this.rightPane.clear();
     this.leftPane.clear();

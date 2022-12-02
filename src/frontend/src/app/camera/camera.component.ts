@@ -182,7 +182,8 @@ export class CameraComponent implements AfterViewInit {
   }
 
   onResults(results: mpHolistic.Results): void{
-    this.loading = false;this.dialog.closeAll()
+    this.loading = false;
+    this.dialog.closeAll()
     if(this.showMediapipe){
       this.drawLandmarks(results);
     }

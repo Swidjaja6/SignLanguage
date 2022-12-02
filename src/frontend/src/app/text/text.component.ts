@@ -18,4 +18,8 @@ export class TextComponent implements AfterViewInit {
   ngAfterViewInit(){
   }
 
+  clear(){
+    this.predictionBoxRef.nativeElement.value = '';
+  }
+
 }

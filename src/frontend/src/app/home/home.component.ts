@@ -19,6 +19,7 @@ export class HomeComponent implements OnInit {
   textAreaRef!: ComponentRef<TextComponent>;
   cameraRef!: ComponentRef<CameraComponent>;
   predictions: string[] = [];
+  singleSequenceMode = false;
 
   constructor(private injector: EnvironmentInjector) { }
 
@@ -30,8 +31,12 @@ export class HomeComponent implements OnInit {
 
   switchMediapipe(e:any){
     this.showMediapipe = e.checked
-    // this.cameraRef.instance.showMediapipe = this.showMediapipe;
-    this.cameraRef.setInput('showMediapipe', this.showMediapipe)
+    this.cameraRef.setInput('showMediapipe', this.showMediapipe);
+  }
+
+  switchPredictionMode(e:any){
+    this.singleSequenceMode = e.checked;
+    this.cameraRef.setInput('singleSequenceMode', this.singleSequenceMode);
   }
 
   onNewPredictions(predictions: string[]){
@@ -39,6 +44,12 @@ export class HomeComponent implements OnInit {
     if(this.predictions.at(-1) != 'nothing'){
       this.textAreaRef.instance.addWord(this.predictions.at(-1));
     }
+  }
+
+
+  startRecord(){
+    if(!this.singleSequenceMode) return;
+    this.cameraRef.instance.startRecord();
   }
 
   onClear(){

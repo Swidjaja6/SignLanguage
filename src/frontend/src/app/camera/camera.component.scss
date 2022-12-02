@@ -11,6 +11,15 @@
     align-items: center;
 }
 
+@keyframes blink { 
+    50% { border-color: #ff0000; } 
+}
+ 
+.blink-record{ 
+    animation: blink .5s step-end infinite alternate;
+    border: 2px solid;
+}
+
 #webcam {
     border: solid 1px black;
     width: 100%;

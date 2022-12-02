@@ -14,6 +14,12 @@
     flex-direction: column;
 }
 
+
+.home-controls{
+    display: flex;
+    justify-content: space-between;
+}
+
 .translate-header{
     width:100%;
     height:3rem;
@@ -32,7 +38,8 @@
     .swap-icon{
         height: 100%;
         width:10%;
-        display: flex;
+        // display: flex;
+        display: none;
         justify-content: center;
         align-items: center;
         cursor: pointer;

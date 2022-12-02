@@ -22,9 +22,11 @@ export class ModelLoadingDialog  {
 export class CameraComponent implements AfterViewInit {
 
   @Input('showMediapipe') showMediapipe: boolean = false;
+  @Input('singleSequenceMode') singleSequenceMode: boolean = false;
   @Output("predictions") predictionsEvent = new EventEmitter<string[]>();
   predictions:string[] = [];
 
+  @ViewChild('mainWrapper') mainWrapper:any;
   @ViewChild('webcam') webcamRef:any; 
   @ViewChild('canvas') canvasRef:any;
   @ViewChild('control') controlP:any;
@@ -37,6 +39,7 @@ export class CameraComponent implements AfterViewInit {
   model:any;
   holistic:any;
   loading = true;
+  recording= false;
 
   constructor(public dialog: MatDialog) {
     
@@ -51,11 +54,16 @@ export class CameraComponent implements AfterViewInit {
       this.webcam.hidden = false;
       this.canvasRef.nativeElement.hidden = true
     }
+    if(changes['singleSequenceMode']){
+      console.log('mode changed')
+    }
   }
 
   async ngAfterViewInit(){
     //load model
     this.model = await tf.loadLayersModel('../../assets/tfjs_converted_model/model.json');
+    //setup mediapipe
+    this.initMediapipe();
     this.openDialog()
     //setup cam
     this.setupWebcam()
@@ -63,11 +71,14 @@ export class CameraComponent implements AfterViewInit {
 
     //get canvas context
     this.canvasCtx = this.canvasRef.nativeElement.getContext('2d');
+  }
 
-    //setup mediapipe
-    this.initMediapipe();
-    
-
+  startRecord(){
+    if(!this.singleSequenceMode) return;
+    this.sequence = [];
+    this.predictions = [];
+    this.recording = true;
+    this.mainWrapper.nativeElement.classList.add('blink-record');
   }
 
   addPrediction(word: string){
@@ -128,7 +139,6 @@ export class CameraComponent implements AfterViewInit {
   }
 
   processLandmarksForPrediction(results: mpHolistic.Results){
-
     //pose
     let pose = new Array(132).fill(0);;  // array of 132 zeroes
     if(results.poseLandmarks){
@@ -182,23 +192,38 @@ export class CameraComponent implements AfterViewInit {
   }
 
   onResults(results: mpHolistic.Results): void{
-    this.loading = false;this.dialog.closeAll()
+    this.loading = false;
+    this.dialog.closeAll()
     if(this.showMediapipe){
       this.drawLandmarks(results);
     }
     let landmarks = this.processLandmarksForPrediction(results);
     let actions = ['hello', 'thanks', 'iloveyou', 'nothing', 'a', 'two']
-    this.sequence.push(landmarks);
-    this.sequence = this.sequence.slice(-30);
-    if(this.sequence && this.sequence.length ==30){
-      let tr = this.model.predict(tf.tensor([this.sequence]));
-      let preds = tr.dataSync();
-      let currentPred = actions[this.argMax(Array.from(preds))];
-      if(this.predictions.at(-1) != currentPred){
-        this.addPrediction(currentPred);
+    
+    if(this.singleSequenceMode){
+      if(this.sequence.length < 30){
+        this.sequence.push(landmarks);
       }
-      
-
+      else if(this.sequence.length == 30 && this.recording){
+        let tr = this.model.predict(tf.tensor([this.sequence]));
+        let preds = tr.dataSync();
+        let currentPred = actions[this.argMax(Array.from(preds))];
+        this.addPrediction(currentPred);
+        this.recording = false;
+        this.mainWrapper.nativeElement.classList.remove('blink-record');
+      }
+    }
+    else{
+      this.sequence.push(landmarks);
+      this.sequence = this.sequence.slice(-30);
+      if(this.sequence && this.sequence.length ==30){
+        let tr = this.model.predict(tf.tensor([this.sequence]));
+        let preds = tr.dataSync();
+        let currentPred = actions[this.argMax(Array.from(preds))];
+        if(this.predictions.at(-1) != currentPred){
+          this.addPrediction(currentPred);
+        }
+      }
     }
   }
 

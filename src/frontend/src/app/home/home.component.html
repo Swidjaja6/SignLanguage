@@ -4,6 +4,15 @@
       <label for="mediaPipeSwitch">Show Mediapipe Output</label>
       <mat-slide-toggle [checked]="showMediapipe" (change)="switchMediapipe($event)" id="mediaPipeSwitch"></mat-slide-toggle>
     </div>
+    <div>
+      <label for="predictionMode">Continuous mode</label>
+      <mat-slide-toggle [checked]="singleSequenceMode" (change)="switchPredictionMode($event)" id="predictionModeSwitch"></mat-slide-toggle>
+      <label for="predictionMode">Single Sign</label>
+    </div>
+    <div *ngIf="singleSequenceMode" class="record-button-container">
+      <button mat-mini-fab color="warn" (click)="startRecord()" aria-label="record button">
+      </button>
+    </div>
     <button class="clear-button" mat-raised-button (click)="onClear()">Clear</button>
   </div>
   
